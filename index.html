@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daily Journal</title>
 
-    <link rel="stylesheet" href="style.css?v=10">
+    <link rel="stylesheet" href="style.css?v=13">
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.470.0/dist/umd/lucide.min.js"></script>
 </head>
 <body>
@@ -57,15 +57,15 @@
     <div class="container">
         <div class="app-shell">
             <header class="app-header">
-                <div>
+                <div class="header-title">
                     <h1 class="title is-2">📖 Daily Journal</h1>
                     <p class="subtitle">Browse your entries or add a new one.</p>
                 </div>
+                <div class="tab-nav" role="tablist" aria-label="View switcher">
+                    <button type="button" class="tab-button active" data-view="list">List View</button>
+                    <button type="button" class="tab-button" data-view="calendar">Calendar View</button>
+                </div>
                 <div class="header-actions">
-                    <div class="tab-nav" role="tablist" aria-label="View switcher">
-                        <button type="button" class="tab-button active" data-view="list">List View</button>
-                        <button type="button" class="tab-button" data-view="calendar">Calendar View</button>
-                    </div>
                     <button type="button" id="logoutButton" class="logout-button" aria-label="Log out">
                         <i data-lucide="log-out"></i>
                     </button>
@@ -78,7 +78,7 @@
                 <section id="emptyState" class="empty-state hidden">
                     <div class="empty-state-card">
                         <h2>No entries yet</h2>
-                        <p>Start by creating a new journal entry with the note button in the corner.</p>
+                        <p>Start your journal by <button type="button" id="emptyStateCta" class="empty-state-cta">creating your first entry</button>.</p>
                     </div>
                 </section>
 
@@ -208,6 +208,6 @@
 </div>
 </div>
 
-<script src="script.js?v=10"></script>
+<script src="script.js?v=13"></script>
 </body>
 </html>

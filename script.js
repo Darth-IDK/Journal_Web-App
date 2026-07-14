@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const detailContent = document.getElementById('detailContent');
     const prevMonthButton = document.getElementById('prevMonthButton');
     const nextMonthButton = document.getElementById('nextMonthButton');
+    const emptyStateCta = document.getElementById('emptyStateCta');
 
     if (window.lucide) lucide.createIcons();
 
@@ -320,6 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     addEntryButton.addEventListener('click', openModal);
+    emptyStateCta.addEventListener('click', openModal);
     modalClose.addEventListener('click', closeModal);
     entryModal.querySelector('.modal-backdrop').addEventListener('click', closeModal);
 
