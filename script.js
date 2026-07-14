@@ -98,6 +98,24 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem(entriesKey(), JSON.stringify(entries));
     };
 
+    let notificationTimeout = null;
+    const showNotification = (text, type = 'success') => {
+        if (notificationTimeout) {
+            clearTimeout(notificationTimeout);
+        }
+        message.textContent = text;
+        message.className = 'app-message';
+        if (type === 'success') {
+            message.classList.add('is-success');
+        } else if (type === 'error') {
+            message.classList.add('is-error');
+        }
+        message.classList.remove('hidden');
+        notificationTimeout = setTimeout(() => {
+            message.classList.add('hidden');
+        }, 4000);
+    };
+
     const getUsers = () => JSON.parse(localStorage.getItem(USERS_KEY)) || [];
     const saveUsers = (users) => localStorage.setItem(USERS_KEY, JSON.stringify(users));
 
@@ -180,7 +198,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const fetchRemoteEntries = async () => {
         const url = `${API_BASE}?email=${encodeURIComponent(currentUserEmail)}`;
         const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
-        if (!response.ok) throw new Error('Remote entries unavailable');
+        if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.error || 'Remote entries unavailable');
+        }
         return response.json();
     };
 
@@ -190,7 +211,10 @@ document.addEventListener('DOMContentLoaded', () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(entry),
         });
-        if (!response.ok) throw new Error('Failed to save remote entry');
+        if (!response.ok) {
+            const errorResponse = await response.json().catch(() => ({}));
+            throw new Error(errorResponse.error || 'Failed to save remote entry');
+        }
         return response.json();
     };
 
@@ -292,16 +316,18 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const loadEntries = async () => {
-        const localEntries = getLocalEntries();
-        let entries = sortEntries(localEntries);
+        let entries = [];
 
         try {
             const remoteEntries = await fetchRemoteEntries();
-            if (Array.isArray(remoteEntries) && remoteEntries.length) {
+            if (Array.isArray(remoteEntries)) {
                 entries = sortEntries(remoteEntries);
             }
         } catch (error) {
-            console.warn(error.message);
+            console.warn('API Offline. Falling back to Local Storage:', error.message);
+            const localEntries = getLocalEntries();
+            entries = sortEntries(localEntries);
+            showNotification('Offline mode: Loaded entries from local storage.', 'error');
         }
 
         currentEntries = entries;
@@ -360,36 +386,67 @@ document.addEventListener('DOMContentLoaded', () => {
 
     journalForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const newEntry = {
-            id: generateId(),
-            title: normalize(document.getElementById('title').value),
-            date: document.getElementById('date').value,
-            mood: document.querySelector('input[name="mood"]:checked')?.value || 'N/A',
-            content: normalize(document.getElementById('content').value),
-            email: currentUserEmail,
-        };
 
-        const todayCount = getLocalEntries().filter((entry) => entry.date === newEntry.date).length;
-        if (todayCount >= 3) {
-            message.textContent = 'You may not create more than three entries per day.';
-            message.classList.remove('hidden');
-            setTimeout(() => message.classList.add('hidden'), 3000);
+        // Retrieve and trim values
+        const titleValue = normalize(document.getElementById('title').value);
+        const dateValue = document.getElementById('date').value;
+        const moodValue = document.querySelector('input[name="mood"]:checked')?.value;
+        const contentValue = normalize(document.getElementById('content').value);
+
+        // 1. Validation Checks (Ensuring fields are not empty)
+        if (!titleValue) {
+            showNotification('Entry Title cannot be empty.', 'error');
+            return;
+        }
+        if (!dateValue) {
+            showNotification('Please select a date for your entry.', 'error');
+            return;
+        }
+        if (!contentValue) {
+            showNotification('Journal entry content cannot be empty.', 'error');
+            return;
+        }
+        if (!moodValue) {
+            showNotification('Please select a mood representing your day.', 'error');
             return;
         }
 
-        saveLocalEntry(newEntry);
-        try {
-            await postRemoteEntry(newEntry);
-            message.textContent = 'Entry saved locally and prepared for remote sync.';
-        } catch (error) {
-            message.textContent = 'Saved locally. Remote API not available yet.';
+        const newEntry = {
+            id: generateId(),
+            title: titleValue,
+            date: dateValue,
+            mood: moodValue,
+            content: contentValue,
+            email: currentUserEmail,
+        };
+
+        // 2. Business Logic Rule: Limit 3 entries per day
+        const todayCount = getLocalEntries().filter((entry) => entry.date === newEntry.date).length;
+        if (todayCount >= 3) {
+            showNotification('You may not create more than three entries per day.', 'error');
+            return;
         }
 
-        message.classList.remove('hidden');
-        setTimeout(() => message.classList.add('hidden'), 3000);
-        closeModal();
-        journalForm.reset();
-        loadEntries();
+        try {
+            // 3. Send new journal entry using the POST endpoint
+            await postRemoteEntry(newEntry);
+            
+            // Backup locally for offline capabilities
+            saveLocalEntry(newEntry);
+
+            // 4. Show success message
+            showNotification('Journal entry saved successfully!', 'success');
+
+            // 5. Clean up form state & Close Modal only on success
+            closeModal();
+            journalForm.reset();
+
+            // 6. Refresh the journal list after adding an entry
+            await loadEntries();
+        } catch (error) {
+            console.error('API Error:', error);
+            showNotification(`Failed to save: ${error.message}`, 'error');
+        }
     });
 
     tabButtons.forEach((button) => {

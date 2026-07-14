@@ -34,16 +34,18 @@ function serializeEntry(documentSnapshot) {
     content: data.content,
     date: data.date,
     mood: data.mood,
+    email: data.email || '',
     createdAt: timestampToIso(data.createdAt),
   };
 }
 
-async function createJournalEntry({ title, content, date, mood }) {
+async function createJournalEntry({ title, content, date, mood, email }) {
   const documentReference = await db.collection(COLLECTION_NAME).add({
     title,
     content,
     date,
     mood,
+    email: email ? email.toLowerCase() : '',
     createdAt: FieldValue.serverTimestamp(),
   });
 
@@ -51,9 +53,12 @@ async function createJournalEntry({ title, content, date, mood }) {
   return serializeEntry(createdDocument);
 }
 
-async function getAllJournalEntries() {
-  const snapshot = await db
-    .collection(COLLECTION_NAME)
+async function getAllJournalEntries(email) {
+  let query = db.collection(COLLECTION_NAME);
+  if (email) {
+    query = query.where('email', '==', email.toLowerCase());
+  }
+  const snapshot = await query
     .orderBy('createdAt', 'desc')
     .get();
 

@@ -39,6 +39,7 @@ function validateJournalEntry(body) {
     content: cleanText(body?.content),
     date: cleanText(body?.date),
     mood: cleanText(body?.mood),
+    email: cleanText(body?.email),
   };
 
   const missingFields = Object.entries(entry)
@@ -78,9 +79,15 @@ function validateJournalEntry(body) {
   return { entry };
 }
 
-async function getEntriesHandler(_request, response) {
+async function getEntriesHandler(request, response) {
+  const email = typeof request.query.email === 'string' ? request.query.email.toLowerCase().trim() : '';
+
+  if (!email) {
+    return response.status(400).json({ error: 'email query parameter is required.' });
+  }
+
   try {
-    const entries = await getAllJournalEntries();
+    const entries = await getAllJournalEntries(email);
     return response.status(200).json(entries);
   } catch (error) {
     console.error('Failed to retrieve journal entries:', error);

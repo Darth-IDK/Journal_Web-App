@@ -10,37 +10,47 @@ app.use(cors()); // Enable CORS for all routes
 app.use(express.json()); // Parse incoming JSON requests
 app.use(express.static(__dirname)); // Serve frontend static assets (HTML, CSS, JS) from the current folder
 
-// In-memory storage (Replace with Firestore as per assignment)
+// Storage configuration (In-memory users store)
 let journalEntries = [];
 let users = []; // { id, email, passwordHash }
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// GET /api/entries?email=... - Retrieve one account's entries
-app.get('/api/entries', (req, res) => {
-    const email = typeof req.query.email === 'string' ? req.query.email.toLowerCase() : '';
+// Register Firestore Database Routes or fallback to In-Memory
+try {
+    const { registerJournalApi } = require('./Firebase/journalApi');
+    registerJournalApi(app);
+    console.log('Firebase Firestore endpoints loaded successfully.');
+} catch (error) {
+    console.warn('\n⚠️  Firebase initialization failed or credentials not set. Falling back to In-Memory storage.');
+    console.warn('Reason:', error.message, '\n');
 
-    if (!email) {
-        return res.status(400).json({ error: 'email query parameter is required.' });
-    }
+    // GET /api/entries?email=... - Retrieve one account's entries (Fallback)
+    app.get('/api/entries', (req, res) => {
+        const email = typeof req.query.email === 'string' ? req.query.email.toLowerCase() : '';
 
-    res.status(200).json(journalEntries.filter((entry) => entry.email === email));
-});
+        if (!email) {
+            return res.status(400).json({ error: 'email query parameter is required.' });
+        }
 
-// POST /api/entries - Submit new data, scoped to an account
-app.post('/api/entries', (req, res) => {
-    const { title, content, date, mood, email, id } = req.body;
+        res.status(200).json(journalEntries.filter((entry) => entry.email === email));
+    });
 
-    // Basic Validation
-    if (!title || !content || !date || !mood || !email) {
-        return res.status(400).json({ error: 'All fields (including email) are required.' });
-    }
+    // POST /api/entries - Submit new data, scoped to an account (Fallback)
+    app.post('/api/entries', (req, res) => {
+        const { title, content, date, mood, email, id } = req.body;
 
-    const newEntry = { title, content, date, mood, email: email.toLowerCase(), id: id || Date.now() };
-    journalEntries.unshift(newEntry);
+        // Basic Validation
+        if (!title || !content || !date || !mood || !email) {
+            return res.status(400).json({ error: 'All fields (including email) are required.' });
+        }
 
-    res.status(201).json({ message: 'Entry saved successfully!', entry: newEntry });
-});
+        const newEntry = { title, content, date, mood, email: email.toLowerCase(), id: id || Date.now() };
+        journalEntries.unshift(newEntry);
+
+        res.status(201).json({ message: 'Entry saved successfully!', entry: newEntry });
+    });
+}
 
 // POST /api/signup - Create a new account
 app.post('/api/signup', async (req, res) => {
