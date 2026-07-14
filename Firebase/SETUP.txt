@@ -1,0 +1,26 @@
+DAILY JOURNAL — PERSON 5 FIREBASE FILES
+
+Files:
+- firebase.js: initializes Firebase Admin and Firestore
+- journalEntriesService.js: Firestore read/write functions
+- journalEntriesHandlers.js: validation and Express handlers
+- journalApi.js: registers exactly GET /api/entries and POST /api/entries
+- test-firestore.js: independent Firestore write/read test
+- test-api.js: POST, GET, and invalid-POST endpoint tests
+
+Required package:
+  npm install firebase-admin
+
+Local credentials:
+  Set GOOGLE_APPLICATION_CREDENTIALS to the absolute path of serviceAccountKey.json.
+  Never place the service-account file in public/ or commit it to Git.
+
+Person 4 adds to server.js after express.json(), CORS, and static middleware:
+  const { registerJournalApi } = require('./journalApi');
+  registerJournalApi(app);
+
+Run Firestore test:
+  node test-firestore.js
+
+Run API test after starting server.js:
+  node test-api.js

@@ -16,12 +16,12 @@ document.addEventListener('DOMContentLoaded', () => {
         dateInput.value = today;
     });
 
-    // 3. Load entries from localStorage
-    const loadEntries = () => {
-        const entries = JSON.parse(localStorage.getItem('journalEntries')) || [];
+    const API_BASE = '/api/entries';
+
+    const renderEntries = (entries) => {
         entriesContainer.innerHTML = '';
 
-        entries.forEach((entry, index) => {
+        entries.forEach((entry) => {
             const card = document.createElement('div');
             card.className = 'column is-half';
             card.innerHTML = `
@@ -40,30 +40,85 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // 4. Handle Form Submission
-    journalForm.addEventListener('submit', (e) => {
+    const getLocalEntries = () => JSON.parse(localStorage.getItem('journalEntries')) || [];
+    const saveLocalEntry = (entry) => {
+        const entries = getLocalEntries();
+        entries.unshift(entry);
+        localStorage.setItem('journalEntries', JSON.stringify(entries));
+    };
+
+    const fetchRemoteEntries = async () => {
+        const response = await fetch(API_BASE, {
+            headers: {
+                'Accept': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Remote entries unavailable');
+        }
+
+        return response.json();
+    };
+
+    const postRemoteEntry = async (entry) => {
+        const response = await fetch(API_BASE, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(entry),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to save remote entry');
+        }
+
+        return response.json();
+    };
+
+    const loadEntries = async () => {
+        let entries = getLocalEntries();
+
+        try {
+            const remoteEntries = await fetchRemoteEntries();
+            if (Array.isArray(remoteEntries) && remoteEntries.length > 0) {
+                entries = remoteEntries;
+            }
+        } catch (error) {
+            // Remote API not available yet; continue using localStorage.
+            console.warn(error.message);
+        }
+
+        renderEntries(entries);
+    };
+
+    journalForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const newEntry = {
             title: document.getElementById('title').value,
             date: document.getElementById('date').value,
             mood: document.querySelector('input[name="mood"]:checked')?.value || 'N/A',
-            content: document.getElementById('content').value
+            content: document.getElementById('content').value,
         };
 
-        // Save to LocalStorage
-        const entries = JSON.parse(localStorage.getItem('journalEntries')) || [];
-        entries.unshift(newEntry); // Newest first
-        localStorage.setItem('journalEntries', JSON.stringify(entries));
+        saveLocalEntry(newEntry);
 
-        // UI Feedback
+        try {
+            await postRemoteEntry(newEntry);
+            message.innerText = 'Entry saved locally and prepared for remote sync.';
+        } catch (error) {
+            message.innerText = 'Saved locally. Remote API not available yet.';
+        }
+
         journalForm.reset();
-        message.innerText = 'Entry saved successfully!';
-        setTimeout(() => message.innerText = '', 3000);
+        setTimeout(() => {
+            message.innerText = '';
+        }, 3000);
 
         loadEntries();
     });
 
-    // Initial load
     loadEntries();
 });
