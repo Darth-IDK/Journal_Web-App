@@ -8,6 +8,7 @@ const PORT = 3000;
 // Middleware
 app.use(cors()); // Enable CORS for all routes
 app.use(express.json()); // Parse incoming JSON requests
+app.use(express.static(__dirname)); // Serve frontend static assets (HTML, CSS, JS) from the current folder
 
 // In-memory storage (Replace with Firestore as per assignment)
 let journalEntries = [];
