@@ -51,6 +51,15 @@ document.addEventListener('DOMContentLoaded', () => {
         'January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December',
     ];
+    
+    const MOOD_ICONS = {
+        thoughtful: 'moon',
+        serene: 'cloud-drizzle',
+        inspired: 'sparkles',
+        focused: 'target',
+        rested: 'coffee',
+        balanced: 'book-open'
+    };
 
     const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const USERS_KEY = 'journalUsers';
