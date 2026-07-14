@@ -428,4 +428,29 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         showAuthScreen();
     }
+        let notificationTimeout = null;
+
+    const showNotification = (text, type = 'success') => {
+        // Clear any active fadeout timers to avoid overlapping
+        if (notificationTimeout) {
+            clearTimeout(notificationTimeout);
+        }
+
+        message.textContent = text;
+        
+        // Reset classes and apply state class
+        message.className = 'app-message';
+        if (type === 'success') {
+            message.classList.add('is-success');
+        } else if (type === 'error') {
+            message.classList.add('is-error');
+        }
+
+        message.classList.remove('hidden');
+
+        // Auto-fade notification after 4 seconds
+        notificationTimeout = setTimeout(() => {
+            message.classList.add('hidden');
+        }, 4000);
+    };
 });
