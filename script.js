@@ -161,39 +161,14 @@ document.addEventListener('DOMContentLoaded', () => {
             calendarGrid.appendChild(cell);
         }
     };
-        const fetchRemoteEntries = async () => {
+
+    const fetchRemoteEntries = async () => {
         const url = `${API_BASE}?email=${encodeURIComponent(currentUserEmail)}`;
         const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
-        if (!response.ok) {
-            const errData = await response.json().catch(() => ({}));
-            throw new Error(errData.error || 'Remote entries unavailable');
-        }
+        if (!response.ok) throw new Error('Remote entries unavailable');
         return response.json();
     };
 
-    const loadEntries = async () => {
-        let entries = [];
-
-        try {
-            // Attempt to load from the server using GET
-            const remoteEntries = await fetchRemoteEntries();
-            if (Array.isArray(remoteEntries)) {
-                entries = sortEntries(remoteEntries);
-            }
-        } catch (error) {
-            console.warn('API Offline. Falling back to Local Storage:', error.message);
-            // Fallback to offline localStorage
-            const localEntries = getLocalEntries();
-            entries = sortEntries(localEntries);
-            showNotification('Offline mode: Loaded entries from local storage.', 'error');
-        }
-
-        currentEntries = entries;
-        renderEntries(entries);
-        createCalendar(entries);
-        applyView();
-    };
-    
     const postRemoteEntry = async (entry) => {
         const response = await fetch(API_BASE, {
             method: 'POST',
@@ -464,29 +439,4 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         showAuthScreen();
     }
-        let notificationTimeout = null;
-
-    const showNotification = (text, type = 'success') => {
-        // Clear any active fadeout timers to avoid overlapping
-        if (notificationTimeout) {
-            clearTimeout(notificationTimeout);
-        }
-
-        message.textContent = text;
-        
-        // Reset classes and apply state class
-        message.className = 'app-message';
-        if (type === 'success') {
-            message.classList.add('is-success');
-        } else if (type === 'error') {
-            message.classList.add('is-error');
-        }
-
-        message.classList.remove('hidden');
-
-        // Auto-fade notification after 4 seconds
-        notificationTimeout = setTimeout(() => {
-            message.classList.add('hidden');
-        }, 4000);
-    };
 });
