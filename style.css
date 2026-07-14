@@ -1015,4 +1015,20 @@ p strong {
     .detail-title {
         font-size: 1.4rem;
     }
+        /* Success and Error Notification Styling */
+    .app-message {
+        transition: all 0.3s ease;
+    }
+
+    .app-message.is-success {
+        background: rgba(46, 213, 115, 0.15);
+        border: 1px solid rgba(46, 213, 115, 0.3);
+        color: #2ed573;
+    }
+
+    .app-message.is-error {
+        background: rgba(255, 71, 87, 0.15);
+        border: 1px solid rgba(255, 71, 87, 0.3);
+        color: #ff4757;
+}
 }
