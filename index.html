@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Journal</title>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.470.0/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+
+<section class="section">
+    <div class="container">
+
+        <!-- Header -->
+        <div class="has-text-centered mb-6">
+            <h1 class="title is-2">📖 Daily Journal</h1>
+            <p class="subtitle">
+                Write down your thoughts and memories.
+            </p>
+        </div>
+
+        <!-- Journal Form -->
+        <div class="box">
+
+            <h2 class="title is-4">New Journal Entry</h2>
+
+            <form id="journalForm">
+
+                <!-- Title -->
+                <div class="field">
+                    <label class="label">Entry Title</label>
+
+                    <div class="control">
+                        <input
+                            id="title"
+                            class="input"
+                            type="text"
+                            placeholder="Enter a title"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <!-- Date -->
+                <div class="field">
+                    <label class="label">Date</label>
+                    <div class="date-row">
+                        <div class="control date-control">
+                            <input
+                                id="date"
+                                class="input"
+                                type="date"
+                                required
+                            >
+                        </div>
+                        <button
+                            type="button"
+                            id="todayButton"
+                            class="button today-button"
+                        >
+                            Today
+                        </button>
+                    </div>
+                    <p class="help">Quickly fill in today’s date when writing your entry.</p>
+                </div>
+
+                <!-- Mood -->
+                <div class="field mood-field">
+                    <label class="label">Mood</label>
+
+                    <div class="mood-grid">
+                               <label class="mood-card">
+    <input type="radio" name="mood" value="thoughtful" required>
+    <div class="mood-icon"><i data-lucide="moon"></i></div>
+    <span>Thoughtful</span>
+</label>
+<label class="mood-card">
+    <input type="radio" name="mood" value="serene">
+    <div class="mood-icon"><i data-lucide="cloud-drizzle"></i></div>
+    <span>Serene</span>
+</label>
+<label class="mood-card">
+    <input type="radio" name="mood" value="inspired">
+    <div class="mood-icon"><i data-lucide="sparkles"></i></div>
+    <span>Inspired</span>
+</label>
+<label class="mood-card">
+    <input type="radio" name="mood" value="focused">
+    <div class="mood-icon"><i data-lucide="target"></i></div>
+    <span>Focused</span>
+</label>
+<label class="mood-card">
+    <input type="radio" name="mood" value="rested">
+    <div class="mood-icon"><i data-lucide="coffee"></i></div>
+    <span>Rested</span>
+</label>
+<label class="mood-card">
+    <input type="radio" name="mood" value="balanced">
+    <div class="mood-icon"><i data-lucide="book-open"></i></div>
+    <span>Balanced</span>
+</label>
+                    </div>
+                </div>
+
+                <!-- Journal Content -->
+                <div class="field">
+                    <label class="label">Journal Entry</label>
+
+                    <div class="control">
+                        <textarea
+                            id="content"
+                            class="textarea"
+                            rows="6"
+                            placeholder="Write about your day..."
+                            required
+                        ></textarea>
+                    </div>
+                </div>
+
+                <!-- Button -->
+                <div class="field">
+                    <div class="control">
+                        <button
+                            type="submit"
+                            class="button is-primary is-fullwidth"
+                        >
+                            Save Entry
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+
+            <!-- Status Message -->
+            <div id="message" class="mt-4"></div>
+
+        </div>
+
+        <!-- Saved Entries -->
+        <div class="mt-6">
+
+            <h2 class="title is-3">
+                Saved Journal Entries
+            </h2>
+
+            <div
+                id="entriesContainer"
+                class="columns is-multiline"
+            >
+
+                <!-- Example Card -->
+
+                <!--
+                <div class="column is-half">
+                    <div class="card">
+
+                        <header class="card-header">
+                            <p class="card-header-title">
+                                My Day
+                            </p>
+                        </header>
+
+                        <div class="card-content">
+                            <div class="content">
+                                Today was productive...
+                            </div>
+
+                            <p>
+                                <strong>Date:</strong>
+                                2026-07-14
+                            </p>
+
+                            <p>
+                                <strong>Mood:</strong>
+                                😊 Happy
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+                -->
+
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+<!-- JavaScript -->
+<!-- app.js is not present in this project, so the browser no longer loads a missing file. -->
+<script>
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var todayButton = document.getElementById('todayButton');
+        var dateInput = document.getElementById('date');
+
+        if (!todayButton || !dateInput) {
+            return;
+        }
+
+        todayButton.addEventListener('click', function () {
+            var today = new Date();
+            var yyyy = today.getFullYear();
+            var mm = String(today.getMonth() + 1).padStart(2, '0');
+            var dd = String(today.getDate()).padStart(2, '0');
+            dateInput.value = yyyy + '-' + mm + '-' + dd;
+            dateInput.focus();
+        });
+    });
+</script>
+</body>
+</html>
