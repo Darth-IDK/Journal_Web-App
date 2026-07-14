@@ -5,216 +5,209 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daily Journal</title>
 
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=10">
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.470.0/dist/umd/lucide.min.js"></script>
 </head>
-    <script src="script.js"></script>
 <body>
-
-<section class="section">
-    <div class="container">
-
-        <!-- Header -->
-        <div class="has-text-centered mb-6">
+<section id="authScreen" class="auth-screen">
+    <div class="auth-card">
+        <div class="auth-header">
             <h1 class="title is-2">📖 Daily Journal</h1>
-            <p class="subtitle">
-                Write down your thoughts and memories.
-            </p>
+            <p class="subtitle">Sign in to your journal, or create a new account.</p>
         </div>
 
-        <!-- Journal Form -->
-        <div class="box">
-
-            <h2 class="title is-4">New Journal Entry</h2>
-
-            <form id="journalForm">
-
-                <!-- Title -->
-                <div class="field">
-                    <label class="label">Entry Title</label>
-
-                    <div class="control">
-                        <input
-                            id="title"
-                            class="input"
-                            type="text"
-                            placeholder="Enter a title"
-                            required
-                        >
-                    </div>
-                </div>
-
-                <!-- Date -->
-                <div class="field">
-                    <label class="label">Date</label>
-                    <div class="date-row">
-                        <div class="control date-control">
-                            <input
-                                id="date"
-                                class="input"
-                                type="date"
-                                required
-                            >
-                        </div>
-                        <button
-                            type="button"
-                            id="todayButton"
-                            class="button today-button"
-                        >
-                            Today
-                        </button>
-                    </div>
-                    <p class="help">Quickly fill in today’s date when writing your entry.</p>
-                </div>
-
-                <!-- Mood -->
-                <div class="field mood-field">
-                    <label class="label">Mood</label>
-
-                    <div class="mood-grid">
-                               <label class="mood-card">
-    <input type="radio" name="mood" value="thoughtful" required>
-    <div class="mood-icon"><i data-lucide="moon"></i></div>
-    <span>Thoughtful</span>
-</label>
-<label class="mood-card">
-    <input type="radio" name="mood" value="serene">
-    <div class="mood-icon"><i data-lucide="cloud-drizzle"></i></div>
-    <span>Serene</span>
-</label>
-<label class="mood-card">
-    <input type="radio" name="mood" value="inspired">
-    <div class="mood-icon"><i data-lucide="sparkles"></i></div>
-    <span>Inspired</span>
-</label>
-<label class="mood-card">
-    <input type="radio" name="mood" value="focused">
-    <div class="mood-icon"><i data-lucide="target"></i></div>
-    <span>Focused</span>
-</label>
-<label class="mood-card">
-    <input type="radio" name="mood" value="rested">
-    <div class="mood-icon"><i data-lucide="coffee"></i></div>
-    <span>Rested</span>
-</label>
-<label class="mood-card">
-    <input type="radio" name="mood" value="balanced">
-    <div class="mood-icon"><i data-lucide="book-open"></i></div>
-    <span>Balanced</span>
-</label>
-                    </div>
-                </div>
-
-                <!-- Journal Content -->
-                <div class="field">
-                    <label class="label">Journal Entry</label>
-
-                    <div class="control">
-                        <textarea
-                            id="content"
-                            class="textarea"
-                            rows="6"
-                            placeholder="Write about your day..."
-                            required
-                        ></textarea>
-                    </div>
-                </div>
-
-                <!-- Button -->
-                <div class="field">
-                    <div class="control">
-                        <button
-                            type="submit"
-                            class="button is-primary is-fullwidth"
-                        >
-                            Save Entry
-                        </button>
-                    </div>
-                </div>
-
-            </form>
-
-            <!-- Status Message -->
-            <div id="message" class="mt-4"></div>
-
+        <div class="auth-toggle" role="tablist" aria-label="Auth mode switcher">
+            <button type="button" class="auth-toggle-button active" data-mode="login">Log In</button>
+            <button type="button" class="auth-toggle-button" data-mode="signup">Sign Up</button>
         </div>
 
-        <!-- Saved Entries -->
-        <div class="mt-6">
+        <div id="authError" class="auth-error hidden"></div>
 
-            <h2 class="title is-3">
-                Saved Journal Entries
-            </h2>
-
-            <div
-                id="entriesContainer"
-                class="columns is-multiline"
-            >
-
-                <!-- Example Card -->
-
-                <!--
-                <div class="column is-half">
-                    <div class="card">
-
-                        <header class="card-header">
-                            <p class="card-header-title">
-                                My Day
-                            </p>
-                        </header>
-
-                        <div class="card-content">
-                            <div class="content">
-                                Today was productive...
-                            </div>
-
-                            <p>
-                                <strong>Date:</strong>
-                                2026-07-14
-                            </p>
-
-                            <p>
-                                <strong>Mood:</strong>
-                                😊 Happy
-                            </p>
-                        </div>
-
-                    </div>
+        <form id="authForm" class="entry-form">
+            <div class="field">
+                <label class="label" for="authEmail">Email</label>
+                <div class="control">
+                    <input id="authEmail" class="input" type="email" placeholder="you@example.com" required>
                 </div>
-                -->
-
             </div>
 
-        </div>
+            <div class="field">
+                <label class="label" for="authPassword">Password</label>
+                <div class="control">
+                    <input id="authPassword" class="input" type="password" placeholder="At least 6 characters" required minlength="6">
+                </div>
+            </div>
 
+            <div class="field hidden" id="authConfirmField">
+                <label class="label" for="authConfirmPassword">Confirm Password</label>
+                <div class="control">
+                    <input id="authConfirmPassword" class="input" type="password" placeholder="Re-enter your password">
+                </div>
+            </div>
+
+            <div class="field mt-4">
+                <button type="submit" id="authSubmit" class="button is-primary is-fullwidth">Log In</button>
+            </div>
+        </form>
     </div>
 </section>
 
-<!-- JavaScript -->
-<!-- app.js is not present in this project, so the browser no longer loads a missing file. -->
-<script>
-    if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
-    }
+<div id="appRoot" class="hidden">
+<section id="appSection" class="section">
+    <div class="container">
+        <div class="app-shell">
+            <header class="app-header">
+                <div>
+                    <h1 class="title is-2">📖 Daily Journal</h1>
+                    <p class="subtitle">Browse your entries or add a new one.</p>
+                </div>
+                <div class="header-actions">
+                    <div class="tab-nav" role="tablist" aria-label="View switcher">
+                        <button type="button" class="tab-button active" data-view="list">List View</button>
+                        <button type="button" class="tab-button" data-view="calendar">Calendar View</button>
+                    </div>
+                    <button type="button" id="logoutButton" class="logout-button" aria-label="Log out">
+                        <i data-lucide="log-out"></i>
+                    </button>
+                </div>
+            </header>
 
-    document.addEventListener('DOMContentLoaded', function () {
-        var todayButton = document.getElementById('todayButton');
-        var dateInput = document.getElementById('date');
+            <div id="message" class="app-message hidden"></div>
 
-        if (!todayButton || !dateInput) {
-            return;
-        }
+            <main class="view-area">
+                <section id="emptyState" class="empty-state hidden">
+                    <div class="empty-state-card">
+                        <h2>No entries yet</h2>
+                        <p>Start by creating a new journal entry with the note button in the corner.</p>
+                    </div>
+                </section>
 
-        todayButton.addEventListener('click', function () {
-            var today = new Date();
-            var yyyy = today.getFullYear();
-            var mm = String(today.getMonth() + 1).padStart(2, '0');
-            var dd = String(today.getDate()).padStart(2, '0');
-            dateInput.value = yyyy + '-' + mm + '-' + dd;
-            dateInput.focus();
-        });
-    });
-</script>
+                <section id="listView" class="view-pane active">
+                    <div class="list-header">
+                        <h2 class="title is-3">Journal Entries</h2>
+                    </div>
+                    <div id="entriesContainer" class="entries-grid"></div>
+                </section>
+
+                <section id="calendarView" class="view-pane hidden">
+                    <div class="calendar-header">
+                        <button type="button" id="prevMonthButton" class="calendar-nav-button" aria-label="Previous month">
+                            <i data-lucide="chevron-left"></i>
+                        </button>
+                        <div id="monthLabel" class="calendar-month"></div>
+                        <button type="button" id="nextMonthButton" class="calendar-nav-button" aria-label="Next month">
+                            <i data-lucide="chevron-right"></i>
+                        </button>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid"></div>
+                </section>
+            </main>
+        </div>
+    </div>
+</section>
+
+<section id="entryDetailView" class="detail-view hidden">
+    <div class="detail-header">
+        <button type="button" id="detailBackButton" class="back-button">
+            <i data-lucide="arrow-left"></i>
+            <span>Back</span>
+        </button>
+    </div>
+    <div class="detail-card">
+        <div class="detail-meta">
+            <span id="detailDate" class="detail-date"></span>
+            <span id="detailMood" class="detail-mood"></span>
+        </div>
+        <h1 id="detailTitle" class="detail-title"></h1>
+        <p id="detailContent" class="detail-content"></p>
+    </div>
+</section>
+
+<button id="addEntryButton" class="fab" aria-label="Add journal entry">
+    <i data-lucide="notebook-pen"></i>
+</button>
+
+<div id="entryModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="entryModalTitle">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card">
+        <div class="modal-card-header">
+            <h2 id="entryModalTitle" class="title is-4">New Journal Entry</h2>
+            <button type="button" id="modalClose" class="modal-close" aria-label="Close entry form">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+
+        <form id="journalForm" class="entry-form">
+            <div class="field-row">
+                <div class="field title-field">
+                    <label class="label" for="title">Entry Title</label>
+                    <div class="control">
+                        <input id="title" class="input" type="text" placeholder="Enter a title" required>
+                    </div>
+                </div>
+
+                <div class="field date-field">
+                    <label class="label" for="date">Date</label>
+                    <div class="date-row">
+                        <div class="control date-control">
+                            <input id="date" class="input" type="date" required>
+                        </div>
+                        <button type="button" id="todayButton" class="button today-button">Today</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="content">Journal Entry</label>
+                <div class="control">
+                    <textarea id="content" class="textarea" rows="5" placeholder="Write about your day..." required></textarea>
+                </div>
+            </div>
+
+            <div class="field mood-field">
+                <label class="label">Mood</label>
+                <div class="mood-grid">
+                    <label class="mood-card">
+                        <input type="radio" name="mood" value="thoughtful" required>
+                        <div class="mood-icon"><i data-lucide="moon"></i></div>
+                        <span>Thoughtful</span>
+                    </label>
+                    <label class="mood-card">
+                        <input type="radio" name="mood" value="serene">
+                        <div class="mood-icon"><i data-lucide="cloud-drizzle"></i></div>
+                        <span>Serene</span>
+                    </label>
+                    <label class="mood-card">
+                        <input type="radio" name="mood" value="inspired">
+                        <div class="mood-icon"><i data-lucide="sparkles"></i></div>
+                        <span>Inspired</span>
+                    </label>
+                    <label class="mood-card">
+                        <input type="radio" name="mood" value="focused">
+                        <div class="mood-icon"><i data-lucide="target"></i></div>
+                        <span>Focused</span>
+                    </label>
+                    <label class="mood-card">
+                        <input type="radio" name="mood" value="rested">
+                        <div class="mood-icon"><i data-lucide="coffee"></i></div>
+                        <span>Rested</span>
+                    </label>
+                    <label class="mood-card">
+                        <input type="radio" name="mood" value="balanced">
+                        <div class="mood-icon"><i data-lucide="book-open"></i></div>
+                        <span>Balanced</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="field mt-4">
+                <button type="submit" class="button is-primary is-fullwidth">Save Entry</button>
+            </div>
+        </form>
+    </div>
+</div>
+</div>
+
+<script src="script.js?v=10"></script>
 </body>
 </html>
