@@ -379,10 +379,19 @@ p strong {
 }
 
 .app-message {
+    position: fixed;
+    top: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 60;
+    width: max-content;
+    max-width: min(420px, calc(100vw - 2.5rem));
     background: rgba(136, 92, 255, 0.14);
     border: 1px solid rgba(136, 92, 255, 0.28);
     border-radius: 16px;
     padding: 0.85rem 1.25rem;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(12px);
     transition: all 0.3s ease;
 }
 
