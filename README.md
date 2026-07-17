@@ -1,10 +1,45 @@
 # Daily Journal
 
-Daily Journal is a full-stack web application that lets users create, read, update, and delete journal entries containing a title, date, mood, and written content. The browser communicates with an Express API, and Cloud Firestore stores the entries permanently for the list, calendar, detail, edit, and delete flows.
+Daily Journal is a full-stack web app for keeping a personal journal. Entries have a title, date, mood, and written content, and can be browsed as a list or on a calendar, opened for full-screen reading, edited, or deleted. An Express API backs the browser, and Cloud Firestore stores entries permanently.
 
-## Core requirements and extra credit
+## Features
 
-The original assignment requires the first two routes. The extra-credit CRUD implementation adds the final two routes:
+- List and calendar views of journal entries, with a full-screen detail page for each one
+- Full CRUD: create, read, update, and delete entries, with an in-app delete confirmation
+- Mood tagging with icon badges on each entry
+- A lightweight local-profile login/sign-up screen, so multiple people sharing a browser get separate journals
+- Responsive, accessible UI (ARIA roles/labels, keyboard navigation) with a dark, purple-accented design
+- Falls back to a per-profile local cache for viewing entries if the API is temporarily unreachable; Firestore is always the source of truth
+
+## Tech stack
+
+- **Frontend:** vanilla JavaScript (native ES modules), HTML, CSS — no framework or build step
+- **Backend:** Node.js + Express
+- **Database:** Google Cloud Firestore
+
+## Project structure
+
+```text
+Journal_Web-App/
+├── public/                  # Everything served to the browser
+│   ├── index.html
+│   ├── style.css
+│   ├── app.js               # Entry point (ES module)
+│   └── js/                  # Feature-scoped modules (auth, entries, calendar, ...)
+├── src/
+│   └── createApp.js         # Express app factory
+├── Firebase/                # Firestore access layer + standalone test scripts
+├── tests/                   # Automated tests (no credentials required)
+├── scripts/
+│   └── check-syntax.js      # Syntax, import, and credential-leak checks
+├── server.js                # Entry point — verifies Firestore, then starts Express
+├── package.json
+└── .gitignore
+```
+
+Only `public/` is served over HTTP. Backend source, tests, and Firebase modules are not reachable from the browser.
+
+## API reference
 
 | Operation | Method | Endpoint | Purpose | Success |
 |---|---|---|---|---|
@@ -15,9 +50,7 @@ The original assignment requires the first two routes. The extra-credit CRUD imp
 
 Validation failures return `400`, missing entries return `404`, and Firestore or unexpected server failures return `500`.
 
-### Create request
-
-The required four-field POST body is accepted exactly as specified:
+**Create** — the four required fields:
 
 ```json
 {
@@ -28,11 +61,9 @@ The required four-field POST body is accepted exactly as specified:
 }
 ```
 
-The existing interface may also send an optional `email` field so local profiles see separate journal lists.
+An optional `email` field scopes the entry to a local profile, so different browser profiles see separate journals.
 
-### Update request
-
-`PATCH` accepts any nonempty subset of `title`, `content`, `date`, and `mood`:
+**Update** — `PATCH` accepts any nonempty subset of `title`, `content`, `date`, and `mood`:
 
 ```json
 {
@@ -41,106 +72,51 @@ The existing interface may also send an optional `email` field so local profiles
 }
 ```
 
-The browser also sends its optional profile email. Email is used only as a scope check and is not changed by PATCH.
-
-### Delete request
+**Delete:**
 
 ```text
 DELETE /api/entries/<document-id>
 ```
 
-The browser appends `?email=user@example.com` when a local profile is active. A missing document or profile mismatch returns `404` without revealing whether another profile owns the document.
+An optional `?email=` query parameter scopes the deletion to a profile. A missing document or profile mismatch both return `404`, without revealing whether another profile owns the document.
 
-## Authentication note
+## Getting started
 
-The login/sign-up screen is retained as a browser-local profile gate so the original interface and account-separated experience remain intact. Passwords are PBKDF2-hashed before being stored in the browser, but this is not production authentication: the server does not issue sessions or authorize email access. Production use would require Firebase Authentication or another identity provider plus server-side authorization.
+### Prerequisites
 
-## Project structure
-
-```text
-Journal_Web-App-main/
-├── public/
-│   ├── index.html
-│   ├── style.css
-│   ├── app.js
-│   └── js/
-├── Firebase/
-│   ├── firebase.js
-│   ├── journalApi.js
-│   ├── journalEntryValidation.js
-│   ├── journalEntriesHandlers.js
-│   ├── journalEntriesService.js
-│   ├── test-api.js
-│   ├── test-firestore.js
-│   └── test-persistence.js
-├── src/
-│   └── createApp.js
-├── tests/
-├── scripts/
-├── server.js
-├── package.json
-├── README.md
-└── .gitignore
-```
-
-Only `public/` is exposed by Express. Backend source files, tests, package metadata, and Firebase modules are not served to the browser.
-
-## Prerequisites
-
-- Node.js 22 or newer
-- npm
+- Node.js 22 or newer, and npm
 - A Firebase project with Cloud Firestore enabled
-- A Firebase Admin service-account JSON key stored **outside** this repository
+- A Firebase Admin service-account JSON key, saved **outside this repository**
 
-## Installation and code-only checks
+### 1. Install dependencies
 
-From the project root:
-
-```cmd
+```bash
 npm install
-npm run check
-npm test
 ```
 
-These checks do not require Firebase credentials. They validate JavaScript syntax, browser imports, local assets, duplicate HTML IDs, credential leaks, the four CRUD route registrations, input validation, CORS, and the in-memory API contract.
+### 2. Provide Firebase credentials
 
-## Firebase Admin credentials on Windows Command Prompt
+Point the `GOOGLE_APPLICATION_CREDENTIALS` environment variable at your service-account key file. This is set at launch time — the path never appears in code or in the repo.
 
-Set the credential only in the terminal that will run the server. Replace the example with the real absolute path; never paste the JSON contents into source code.
+macOS/Linux:
+
+```bash
+export GOOGLE_APPLICATION_CREDENTIALS=/absolute/path/to/service-account-key.json
+```
+
+Windows (Command Prompt):
 
 ```cmd
 set "GOOGLE_APPLICATION_CREDENTIALS=C:\full\path\service-account-key.json"
 ```
 
-Verify that the file exists without displaying its contents:
+### 3. Start the server
 
-```cmd
-if exist "%GOOGLE_APPLICATION_CREDENTIALS%" (echo CREDENTIAL_FILE_FOUND) else (echo CREDENTIAL_FILE_NOT_FOUND)
-```
-
-The service-account file must remain outside `public/`, outside screenshots, and outside Git/GitHub.
-
-## Firestore connection test
-
-```cmd
-npm run test:firestore
-```
-
-A successful result ends with:
-
-```text
-Firestore connection test passed.
-```
-
-The first successful write creates the `journalEntries` collection automatically if it does not already exist.
-
-## Start the application
-
-```cmd
+```bash
 npm start
 ```
 
-The server verifies Firestore before opening port 3000. Successful startup includes:
+The server verifies its Firestore connection before it starts listening — if credentials are missing or invalid, it fails fast with a clear error instead of silently falling back to fake data. On success:
 
 ```text
 Firebase Firestore connection verified.
@@ -148,82 +124,27 @@ Firebase Firestore endpoints loaded successfully.
 Server running at http://localhost:3000
 ```
 
-Open `http://localhost:3000` in a browser. Do not open `public/index.html` directly because the frontend API calls require the Express server.
+Open `http://localhost:3000` in a browser (set a `PORT` environment variable to use a different port). Don't open `public/index.html` directly — the frontend expects the API to be reachable at the same origin.
 
-## Complete CRUD API test
+## Testing
 
-With the server running in one terminal, use another terminal in the same project folder:
-
-```cmd
-npm run test:api
+```bash
+npm run check          # Syntax, import, HTML-id, and credential-leak checks — no Firebase needed
+npm test               # Unit/contract tests — no Firebase needed
+npm run test:firestore # Confirms a live Firestore connection and basic CRUD
+npm run test:api       # End-to-end CRUD test against a running server (needs `npm start` in another terminal)
+npm run test:persistence -- <document-id>  # Confirms a document survives a server restart
 ```
 
-The test verifies:
+## Authentication note
 
-- successful POST with status `201`
-- successful GET with status `200`
-- invalid POST with status `400`
-- successful PATCH with status `200`
-- invalid PATCH with status `400`
-- GET returning the updated Firestore document
-- successful DELETE with status `200`
-- GET confirming that the deleted document is gone
+The login/sign-up screen is a browser-local profile gate, not a production authentication system. Passwords are PBKDF2-hashed before being stored in the browser, but the server does not issue sessions or authorize access by email — it's meant to let multiple people share a browser with separate journals, not to secure data against a determined attacker. Real authentication would require Firebase Authentication (or another identity provider) plus server-side authorization.
 
-The test creates one persistent document and a second temporary CRUD document. The temporary document is updated and deleted; the first document remains and produces:
+## How it works
 
-```text
-PERSISTENCE_ID=<document-id>
-```
-
-## Permanent-storage verification
-
-Restart the Express server, then run:
-
-```cmd
-npm run test:persistence -- <document-id>
-```
-
-A successful result ends with:
-
-```text
-Firestore persistence test passed.
-```
-
-## Browser CRUD flow
-
-1. Sign up or log in through the existing local-profile screen.
-2. Create an entry with the floating add button.
-3. Open the saved card to view its detail page.
-4. Select **Edit**, change one or more fields, and save.
-5. Open **Delete**, review the confirmation, and permanently remove the entry.
-6. Confirm that list and calendar views refresh after each operation.
-
-The edit and delete controls use the existing dark-purple design system. No original view or layout was removed.
-
-## Final evidence checklist
-
-Capture screenshots only after the corresponding success result is visible:
-
-1. `npm run test:firestore` ending in `Firestore connection test passed.`
-2. Firebase Console showing `(default)`, `journalEntries`, and the Firestore fields.
-3. `npm run test:api` showing POST `201`.
-4. The same test showing GET `200`.
-5. The same test showing invalid POST `400`.
-6. The same test showing PATCH `200` and the GET update confirmation.
-7. The same test showing DELETE `200` and the GET deletion confirmation.
-8. Browser interface showing a saved journal card.
-9. Browser detail page showing the Edit and Delete controls.
-10. Browser showing a successfully edited entry.
-11. `npm run test:persistence -- <document-id>` after restarting the server.
-
-Do not include the service-account filename, path, private key, browser Downloads page, or JSON contents in screenshots.
-
-## Design, data, and reliability notes
-
-- The original visual theme, login screen, list view, calendar view, entry detail page, modal, mood cards, and responsive CSS are preserved.
-- Firestore is authoritative; localStorage is only a per-profile browser cache for temporary offline viewing.
-- Create and edit enforce the existing maximum of three entries per journal date; editing an entry does not count the entry against itself.
-- Delete uses an in-app confirmation dialog and does not remove the local cache unless Firestore confirms success.
-- Firestore updates use `updatedAt` server timestamps while preserving the original `createdAt` timestamp.
-- The server does not silently fall back to in-memory storage. If Firestore authentication or connectivity fails, startup fails visibly instead of pretending data is permanent.
-- Email filtering is performed without combining a Firestore `where` with `orderBy`, avoiding a composite-index requirement for this small class project.
+- Firestore is the source of truth; the browser's local cache is only used to keep showing entries if the API is briefly unreachable.
+- Creating or editing an entry enforces a maximum of three entries per journal date; editing an entry doesn't count against itself.
+- Deleting requires an in-app confirmation, and the local cache is only updated after Firestore confirms the delete succeeded.
+- Updates set an `updatedAt` server timestamp while preserving the original `createdAt`.
+- The server does not fall back to in-memory storage if Firestore is unreachable — it fails startup visibly instead.
+- Reads that filter by profile email sort results in application code rather than in a Firestore query, to avoid requiring a composite index for a small project like this.
