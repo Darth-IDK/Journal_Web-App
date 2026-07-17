@@ -1,9 +1,10 @@
-// All DOM element lookups, in one place, so every other module imports
-// the same references instead of re-querying the document.
-// Safe to run at module top level (not wrapped in DOMContentLoaded) because
-// `type="module"` scripts are deferred and only run after the HTML is parsed.
+// Centralized DOM element references. Module scripts execute after HTML parsing.
 
 export const journalForm = document.getElementById('journalForm');
+export const titleInput = document.getElementById('title');
+export const contentInput = document.getElementById('content');
+export const entryModalTitle = document.getElementById('entryModalTitle');
+export const entrySubmitButton = document.getElementById('entrySubmitButton');
 export const entriesContainer = document.getElementById('entriesContainer');
 export const message = document.getElementById('message');
 export const dateInput = document.getElementById('date');
@@ -33,9 +34,16 @@ export const logoutButton = document.getElementById('logoutButton');
 export const appSection = document.getElementById('appSection');
 export const entryDetailView = document.getElementById('entryDetailView');
 export const detailBackButton = document.getElementById('detailBackButton');
+export const detailEditButton = document.getElementById('detailEditButton');
+export const detailDeleteButton = document.getElementById('detailDeleteButton');
 export const detailTitle = document.getElementById('detailTitle');
 export const detailDate = document.getElementById('detailDate');
 export const detailMood = document.getElementById('detailMood');
 export const detailContent = document.getElementById('detailContent');
+export const deleteConfirmModal = document.getElementById('deleteConfirmModal');
+export const deleteConfirmClose = document.getElementById('deleteConfirmClose');
+export const deleteCancelButton = document.getElementById('deleteCancelButton');
+export const deleteConfirmButton = document.getElementById('deleteConfirmButton');
+export const deleteEntryTitle = document.getElementById('deleteEntryTitle');
 export const prevMonthButton = document.getElementById('prevMonthButton');
 export const nextMonthButton = document.getElementById('nextMonthButton');

@@ -1,0 +1,33 @@
+{
+  "name": "daily-journal-web-app",
+  "version": "1.1.0",
+  "private": true,
+  "description": "A complete CRUD Daily Journal application using an Express API and Cloud Firestore.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "check": "node scripts/check-syntax.js",
+    "test": "node --test tests/*.test.js",
+    "test:api": "node Firebase/test-api.js",
+    "test:crud": "node Firebase/test-api.js",
+    "test:firestore": "node Firebase/test-firestore.js",
+    "test:persistence": "node Firebase/test-persistence.js"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "keywords": [
+    "journal",
+    "crud",
+    "express",
+    "firestore"
+  ],
+  "license": "UNLICENSED",
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "firebase-admin": "^14.1.0"
+  }
+}

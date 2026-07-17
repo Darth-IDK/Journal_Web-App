@@ -1,26 +1,34 @@
-DAILY JOURNAL — PERSON 5 FIREBASE FILES
+DAILY JOURNAL — FIREBASE AND CRUD SETUP SUMMARY
 
-Files:
-- firebase.js: initializes Firebase Admin and Firestore
-- journalEntriesService.js: Firestore read/write functions
-- journalEntriesHandlers.js: validation and Express handlers
-- journalApi.js: registers exactly GET /api/entries and POST /api/entries
-- test-firestore.js: independent Firestore write/read test
-- test-api.js: POST, GET, and invalid-POST endpoint tests
+1. Keep the Firebase Admin service-account JSON outside this repository.
+2. In Windows Command Prompt, set:
 
-Required package:
-  npm install firebase-admin
+   set "GOOGLE_APPLICATION_CREDENTIALS=C:\full\path\service-account-key.json"
 
-Local credentials:
-  Set GOOGLE_APPLICATION_CREDENTIALS to the absolute path of serviceAccountKey.json.
-  Never place the service-account file in public/ or commit it to Git.
+3. Run the independent Firestore test:
 
-Person 4 adds to server.js after express.json(), CORS, and static middleware:
-  const { registerJournalApi } = require('./journalApi');
-  registerJournalApi(app);
+   npm run test:firestore
 
-Run Firestore test:
-  node test-firestore.js
+4. Start the Express server:
 
-Run API test after starting server.js:
-  node test-api.js
+   npm start
+
+5. In a second terminal, test the complete CRUD API:
+
+   npm run test:api
+
+6. Keep the PERSISTENCE_ID printed by test-api.js. Restart the server and run:
+
+   npm run test:persistence -- <document-id>
+
+Active API endpoints:
+- GET    /api/entries
+- POST   /api/entries
+- PATCH  /api/entries/:id
+- DELETE /api/entries/:id
+
+The GET and POST routes satisfy the core assignment. PATCH and DELETE provide
+complete CRUD for the extra-credit requirement.
+
+See README.md for complete setup, API bodies, testing, screenshots, and
+credential-security guidance.

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A full-stack daily journal powered by Express and Cloud Firestore.">
+    <title>Daily Journal</title>
+
+    <link rel="stylesheet" href="style.css?v=19">
+    <script defer src="https://cdn.jsdelivr.net/npm/lucide@0.470.0/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+<section id="authScreen" class="auth-screen">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1 class="title is-2">📖 Daily Journal</h1>
+            <p class="subtitle">Sign in to your journal, or create a new account.</p>
+        </div>
+
+        <div class="auth-toggle" role="tablist" aria-label="Auth mode switcher">
+            <button type="button" class="auth-toggle-button active" data-mode="login" role="tab" aria-selected="true">Log In</button>
+            <button type="button" class="auth-toggle-button" data-mode="signup" role="tab" aria-selected="false">Sign Up</button>
+        </div>
+
+        <div id="authError" class="auth-error hidden" role="alert" aria-live="assertive"></div>
+
+        <form id="authForm" class="entry-form">
+            <div class="field">
+                <label class="label" for="authEmail">Email</label>
+                <div class="control">
+                    <input
+                        id="authEmail"
+                        name="email"
+                        class="input"
+                        type="email"
+                        placeholder="you@example.com"
+                        autocomplete="username"
+                        inputmode="email"
+                        autocapitalize="none"
+                        spellcheck="false"
+                        maxlength="254"
+                        required
+                    >
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="authPassword">Password</label>
+                <div class="control">
+                    <input
+                        id="authPassword"
+                        name="password"
+                        class="input"
+                        type="password"
+                        placeholder="At least 6 characters"
+                        autocomplete="current-password"
+                        required
+                        minlength="6"
+                        maxlength="128"
+                    >
+                </div>
+            </div>
+
+            <div class="field hidden" id="authConfirmField">
+                <label class="label" for="authConfirmPassword">Confirm Password</label>
+                <div class="control">
+                    <input
+                        id="authConfirmPassword"
+                        name="confirmPassword"
+                        class="input"
+                        type="password"
+                        placeholder="Re-enter your password"
+                        autocomplete="new-password"
+                        minlength="6"
+                        maxlength="128"
+                    >
+                </div>
+            </div>
+
+            <div class="field mt-4">
+                <button type="submit" id="authSubmit" class="button is-primary is-fullwidth">Log In</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<div id="appRoot" class="hidden">
+<div id="message" class="app-message hidden" role="status" aria-live="polite"></div>
+<section id="appSection" class="section">
+    <div class="container">
+        <div class="app-shell">
+            <header class="app-header">
+                <div class="header-title">
+                    <h1 class="title is-2">📖 Daily Journal</h1>
+                    <p class="subtitle">Browse your entries or add a new one.</p>
+                </div>
+                <div class="tab-nav" role="tablist" aria-label="View switcher">
+                    <button type="button" class="tab-button active" data-view="list" role="tab" aria-selected="true">List View</button>
+                    <button type="button" class="tab-button" data-view="calendar" role="tab" aria-selected="false">Calendar View</button>
+                </div>
+                <div class="header-actions">
+                    <button type="button" id="logoutButton" class="logout-button" aria-label="Log out">
+                        <i data-lucide="log-out"></i>
+                    </button>
+                </div>
+            </header>
+
+            <main class="view-area">
+                <section id="emptyState" class="empty-state hidden">
+                    <div class="empty-state-card">
+                        <h2>No entries yet</h2>
+                        <p>Start your journal by <button type="button" id="emptyStateCta" class="empty-state-cta">creating your first entry</button>.</p>
+                    </div>
+                </section>
+
+                <section id="listView" class="view-pane active">
+                    <div class="list-header">
+                        <h2 class="title is-3">Journal Entries</h2>
+                    </div>
+                    <div id="entriesContainer" class="entries-grid"></div>
+                </section>
+
+                <section id="calendarView" class="view-pane hidden">
+                    <div class="calendar-header">
+                        <button type="button" id="prevMonthButton" class="calendar-nav-button" aria-label="Previous month">
+                            <i data-lucide="chevron-left"></i>
+                        </button>
+                        <div id="monthLabel" class="calendar-month"></div>
+                        <button type="button" id="nextMonthButton" class="calendar-nav-button" aria-label="Next month">
+                            <i data-lucide="chevron-right"></i>
+                        </button>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid"></div>
+                </section>
+            </main>
+        </div>
+    </div>
+</section>
+
+<section id="entryDetailView" class="detail-view hidden">
+    <div class="detail-header">
+        <button type="button" id="detailBackButton" class="back-button">
+            <i data-lucide="arrow-left"></i>
+            <span>Back</span>
+        </button>
+    </div>
+    <div class="detail-card">
+        <div class="detail-meta">
+            <span id="detailDate" class="detail-date"></span>
+            <span id="detailMood" class="detail-mood"></span>
+        </div>
+        <h1 id="detailTitle" class="detail-title"></h1>
+        <p id="detailContent" class="detail-content"></p>
+        <div class="detail-actions" aria-label="Journal entry actions">
+            <button type="button" id="detailEditButton" class="detail-action-button">
+                <i data-lucide="pencil"></i>
+                <span>Edit Entry</span>
+            </button>
+            <button type="button" id="detailDeleteButton" class="detail-action-button is-danger">
+                <i data-lucide="trash-2"></i>
+                <span>Delete Entry</span>
+            </button>
+        </div>
+    </div>
+</section>
+
+<button type="button" id="addEntryButton" class="fab" aria-label="Add journal entry">
+    <i data-lucide="notebook-pen"></i>
+</button>
+
+<div id="entryModal" class="modal hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="entryModalTitle">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card">
+        <div class="modal-card-header">
+            <h2 id="entryModalTitle" class="title is-4">New Journal Entry</h2>
+            <button type="button" id="modalClose" class="modal-close" aria-label="Close entry form">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+
+        <form id="journalForm" class="entry-form">
+            <div class="field-row">
+                <div class="field title-field">
+                    <label class="label" for="title">Entry Title</label>
+                    <div class="control">
+                        <input id="title" name="title" class="input" type="text" placeholder="Enter a title" maxlength="120" required>
+                    </div>
+                </div>
+
+                <div class="field date-field">
+                    <label class="label" for="date">Date</label>
+                    <div class="date-row">
+                        <div class="control date-control">
+                            <input id="date" name="date" class="input" type="date" required>
+                        </div>
+                        <button type="button" id="todayButton" class="button today-button">Today</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="content">Journal Entry</label>
+                <div class="control">
+                    <textarea id="content" name="content" class="textarea" rows="5" placeholder="Write about your day..." maxlength="10000" required></textarea>
+                </div>
+            </div>
+
+            <div class="field mood-field">
+                <span class="label">Mood</span>
+                <div class="mood-grid" role="radiogroup" aria-label="Mood">
+                    <label class="mood-card">
+                        <input type="radio" name="mood" value="thoughtful" required>
+                        <div class="mood-icon"><i data-lucide="moon"></i></div>
+                        <span>Thoughtful</span>
+                    </label>
+                    <label class="mood-card">
+                        <input type="radio" name="mood" value="serene">
+                        <div class="mood-icon"><i data-lucide="cloud-drizzle"></i></div>
+                        <span>Serene</span>
+                    </label>
+                    <label class="mood-card">
+                        <input type="radio" name="mood" value="inspired">
+                        <div class="mood-icon"><i data-lucide="sparkles"></i></div>
+                        <span>Inspired</span>
+                    </label>
+                    <label class="mood-card">
+                        <input type="radio" name="mood" value="focused">
+                        <div class="mood-icon"><i data-lucide="target"></i></div>
+                        <span>Focused</span>
+                    </label>
+                    <label class="mood-card">
+                        <input type="radio" name="mood" value="rested">
+                        <div class="mood-icon"><i data-lucide="coffee"></i></div>
+                        <span>Rested</span>
+                    </label>
+                    <label class="mood-card">
+                        <input type="radio" name="mood" value="balanced">
+                        <div class="mood-icon"><i data-lucide="book-open"></i></div>
+                        <span>Balanced</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="field mt-4">
+                <button type="submit" id="entrySubmitButton" class="button is-primary is-fullwidth">Save Entry</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div
+    id="deleteConfirmModal"
+    class="modal hidden"
+    role="dialog"
+    aria-modal="true"
+    aria-hidden="true"
+    aria-labelledby="deleteConfirmTitle"
+    aria-describedby="deleteConfirmDescription"
+>
+    <div class="modal-backdrop"></div>
+    <div class="modal-card confirmation-modal-card">
+        <div class="modal-card-header">
+            <h2 id="deleteConfirmTitle" class="title is-4">Delete Journal Entry?</h2>
+            <button type="button" id="deleteConfirmClose" class="modal-close" aria-label="Close delete confirmation">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+        <p id="deleteConfirmDescription" class="confirmation-copy">
+            This action permanently removes the selected entry from Firestore and cannot be undone.
+        </p>
+        <p id="deleteEntryTitle" class="confirmation-entry-title"></p>
+        <div class="confirmation-actions">
+            <button type="button" id="deleteCancelButton" class="button confirmation-cancel">Cancel</button>
+            <button type="button" id="deleteConfirmButton" class="button confirmation-delete">Delete Entry</button>
+        </div>
+    </div>
+</div>
+
+</div>
+
+<script type="module" src="app.js?v=19"></script>
+</body>
+</html>

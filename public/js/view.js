@@ -1,11 +1,13 @@
-// List/Calendar tab switching, plus the empty-state gate.
+// List/calendar tab switching and empty-state handling.
 
 import { state } from './state.js';
 import { tabNav, tabButtons, listView, calendarView, emptyState } from './dom.js';
 
 export const applyView = () => {
     tabButtons.forEach((button) => {
-        button.classList.toggle('active', button.dataset.view === state.activeView);
+        const isActive = button.dataset.view === state.activeView;
+        button.classList.toggle('active', isActive);
+        button.setAttribute('aria-selected', String(isActive));
     });
 
     const hasEntries = state.currentEntries.length > 0;
@@ -30,7 +32,7 @@ export const applyView = () => {
 };
 
 export const switchView = (view) => {
-    state.activeView = view;
+    state.activeView = view === 'calendar' ? 'calendar' : 'list';
     applyView();
 };
 

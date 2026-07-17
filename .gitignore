@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# Firebase / Google Cloud credentials — never commit these
+serviceAccountKey.json
+service-account*.json
+firebase-credentials*.json
+*-firebase-adminsdk-*.json
+.env
+.env.*
+
+# OS cruft
+.DS_Store
